@@ -2,9 +2,12 @@
 $version: "2"
 namespace example.weather
 
+use aws.protocols#restJson1
+
 /// Provides weather forecasts.
 /// Triple slash comments attach documentation to shapes
 @paginated(inputToken: "nextToken", outputToken: "nextToken", pageSize: "pageSize")
+@restJson1
 service Weather {
     version: "2006-03-01"
     resources: [City]
@@ -30,6 +33,7 @@ string CityId
 
 
 @readonly
+@http(code: 200, method: "GET", uri: "/cities/{cityId}")
 operation GetCity {
     input: GetCityInput
     output: GetCityOutput
@@ -41,6 +45,7 @@ structure GetCityInput {
     // "cityId" provides the identifier for the resource and
     // has to be marked as required.
     @required
+    @httpLabel
     cityId: CityId  // user needs to pass this as url param
 }
 
@@ -69,6 +74,7 @@ structure NoSuchResource {
 
 @paginated(items: "items")
 @readonly
+@http(code: 200, method: "GET", uri: "/cities")
 operation ListCities {
     input: ListCitiesInput
     output: ListCitiesOutput
@@ -76,7 +82,9 @@ operation ListCities {
 
 @input
 structure ListCitiesInput {
+    @httpQuery("nextToken")
     nextToken: String
+    @httpQuery("pageSize")
     pageSize: Integer
 }
 
@@ -103,6 +111,7 @@ structure CitySummary {
 }
 
 @readonly
+@http(code: 200, method: "GET", uri: "/forecast/{cityId}")
 operation GetForecast {
     input: GetForecastInput
     output: GetForecastOutput
@@ -111,6 +120,7 @@ operation GetForecast {
 @input
 structure GetForecastInput {
     @required
+    @httpLabel  // refers to path parameter
     cityId: CityId
 }
 
@@ -120,6 +130,7 @@ structure GetForecastOutput {
 }
 
 @readonly
+@http(code: 200, method: "GET", uri: "/currentTime")
 operation GetCurrentTime {
     input: GetCurrentTimeInput
     output: GetCurrentTimeOutput
